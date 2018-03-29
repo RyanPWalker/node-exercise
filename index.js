@@ -5,24 +5,24 @@ const app     = express();
 
 app.use(cors());
 
-app.get('/api/people/:number',
-  findPeople,
+app.get('/get/:item',
+  get,
   jsonResponse
 );
 
-app.get('/api/planet/:number',
-  findPlanets,
+app.get('/search/:item/:attribute',
+  search,
   jsonResponse
 );
 
-function findPeople(req, res, next) {
-  const url = `https://swapi.co/api/people/${req.params.number}`;
-  console.log(url);
+function get(req, res, next) {
+  const url = `https://swapi.co/api/${req.params.item}`;
+  console.log(url)
   request(url, handleApiResponse(res, next));
 }
 
-function findPlanets(req, res, next) {
-  const url = `https://swapi.co/api/planets/${req.params.number}`;
+function search(req, res, next) {
+  const url = `https://swapi.co/api/${req.params.item}/?search=${req.params.attribute}`;
   request(url, handleApiResponse(res, next));
 }
 

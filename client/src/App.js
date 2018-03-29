@@ -1,28 +1,33 @@
 import React, { Component } from 'react';
 import './App.css';
+import logo from './logo.png';
+import jedi from './darthvader.jpg';
+import planet from './deathstar.png';
 
 class App extends Component {
   state = {
     data: [],
-    choice1: 'people',
-    choice2: 1,
+    choice1: 'get',
+    choice2: 'people',
+    choice3: '',
     errorMessage: '',
 
   };
 
-  componentDidMount = () => {
-    this.getStuff();
-  }
-
   handleInputChange = event => {
-    const value = event.target.value;
     const name = event.target.name;
+    const one = name.split(' ')[0];
+    const two = name.split(' ')[1];
+    const three = one === 'search' ? event.target.value : '';
 
     this.setState({
-      [name]: value
+      choice1: one,
+      choice2: two,
+      choice3: three
+    }, () => {
+      if (this.state.choice1)
+        this.getStuff();
     });
-    // I did have it set to automatically fetch results when changed
-    // But I left it out since the instructions ask for a button.
   }
 
   handleSubmit = () => {
@@ -35,7 +40,7 @@ class App extends Component {
   }
 
   getStuff = () => {
-    const endpoint = '/api/' + this.state.choice1 + '/' + this.state.choice2;
+    const endpoint = '/' + this.state.choice1 + '/' + this.state.choice2 + '/' + this.state.choice3;
     console.log(endpoint)
 
     try {
@@ -49,6 +54,7 @@ class App extends Component {
             })
           } else {
             this.setState({ errorMessage: 'Unable to fetch results.'})
+            console.log("Error message: ", res.error)
           }
         });
     } catch (e) {
@@ -60,7 +66,7 @@ class App extends Component {
   renderEmptyState = () => {
     if (this.state.data.length === 0) {
       return (
-        <p style={{ fontSize: '12px', color: 'grey' }}>No data has been fetched.  Select an option and click Submit to continue.</p>
+        <p style={{ fontSize: '12px', color: 'grey' }}>No data has been fetched.  Select an option to continue.</p>
       )
     }
   }
@@ -69,9 +75,25 @@ class App extends Component {
   render() {
     return (
       <main className="App">
-        <h1>People</h1>
-        {this.state.data.name}
+        <img src={logo} alt="logo" className="image" />
+        <h1>API Fun</h1>
+        <div className="container">
+          <div className="buttonDiv">
+            <img src={jedi} alt="logo" className="buttonImage" />
+            <input type="button" name="get people" value="All People" onClick={this.handleInputChange} />
+            <input type="text" name="search people" placeholder="Search people" onChange={this.handleInputChange} />
+          </div>
+          <div className="buttonDiv">
+            <img src={planet} alt="logo" className="buttonImage" />
+            <input type="button" name="get planets" value="All Planets" onClick={this.handleInputChange} />
+          </div>
+        </div>
+        {/*this.state.data.map((rep, index) =>
+          <p key={index}>{rep.name}</p>
+        )*/}
+        {JSON.stringify(this.state.data)}
         {this.renderEmptyState()}
+        {this.state.errorMessage}
       </main>
     );
   }
