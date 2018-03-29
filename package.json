@@ -1,0 +1,23 @@
+{
+  "name": "node-exercise",
+  "version": "1.0.0",
+  "description": "API for Star Wars",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryanpwalker/node-exercise.git"
+  },
+  "author": "ryanpwalker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryanpwalker/node-exercise/issues"
+  },
+  "homepage": "https://github.com/ryanpwalker/node-exercise",
+  "dependencies": {
+    "cors": "^2.8.4"
+  }
+}
