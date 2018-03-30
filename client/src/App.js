@@ -1,76 +1,89 @@
-import React, { Component } from 'react';
-import './App.css';
-import logo from './logo.png';
-import jedi from './darthvader.jpg';
-import planet from './deathstar.png';
+import React, { Component } from "react";
+import "./App.css";
+import logo from "./logo.png";
+import jedi from "./darthvader.jpg";
+import planet from "./deathstar.png";
 
 class App extends Component {
   state = {
     data: [],
-    choice1: 'get',
-    choice2: 'people',
-    choice3: '',
-    errorMessage: '',
-
+    url: "",
+    choice1: "get",
+    choice2: "people",
+    choice3: "",
+    errorMessage: ""
   };
 
   handleInputChange = event => {
     const name = event.target.name;
-    const one = name.split(' ')[0];
-    const two = name.split(' ')[1];
-    const three = one === 'search' ? event.target.value : '';
+    const one = "/" + name.split(" ")[0];
+    const two = "/" + name.split(" ")[1];
+    let three =
+      one === "/search" ? "/" + event.target.value : name.split(" ")[2];
+    const endpoint = one + two + three;
+    console.log(endpoint);
 
     this.setState({
       choice1: one,
       choice2: two,
-      choice3: three
-    }, () => {
-      if (this.state.choice1)
-        this.getStuff();
+      choice3: three,
+      url: endpoint
     });
-  }
+  };
 
-  handleSubmit = () => {
-    this.setState({
-      
-    }, () => {
-      if (this.state.choice2)
-        this.getStuff();
+  handleClick = () => {
+    this.setState({}, () => {
+      if (this.state.choice1) this.getStuff();
     });
-  }
+  };
 
   getStuff = () => {
-    const endpoint = '/' + this.state.choice1 + '/' + this.state.choice2 + '/' + this.state.choice3;
-    console.log(endpoint)
-
     try {
-      fetch(endpoint)
+      fetch(this.state.url)
         .then(res => res.json())
         .then(res => {
           if (res.success === true) {
-            this.setState({ 
+            this.setState({
               data: res.results,
-              errorMessage: '' 
-            })
+              errorMessage: ""
+            });
           } else {
-            this.setState({ errorMessage: 'Unable to fetch results.'})
-            console.log("Error message: ", res.error)
+            this.setState({ errorMessage: "Unable to fetch results." });
+            console.log("Error message: ", res.error);
           }
         });
     } catch (e) {
-      console.log("Something went wrong- ", e)
-      this.setState({ errorMessage: 'Unable to fetch results.'})
+      console.log("Something went wrong- ", e);
+      this.setState({ errorMessage: "Unable to fetch results." });
     }
-  }
+  };
 
   renderEmptyState = () => {
     if (this.state.data.length === 0) {
       return (
-        <p style={{ fontSize: '12px', color: 'grey' }}>No data has been fetched.  Select an option to continue.</p>
-      )
+        <p style={{ fontSize: "12px", color: "grey" }}>
+          No data has been fetched. Select an option and click Go!
+        </p>
+      );
     }
-  }
+  };
 
+  renderSorts = () => {
+    if (this.state.choice2 === "people") {
+      return this.state.data.map((rep, index) => (
+        <p key={index}>
+          {rep.name} {rep.mass} {rep.height}
+        </p>
+      ));
+    }
+    if (this.state.choice2 === "planets") {
+      return this.state.data.map((rep, index) => (
+        <p key={index}>
+          {rep.name} {rep.population} {rep.diameter}
+        </p>
+      ));
+    }
+  };
 
   render() {
     return (
@@ -80,18 +93,110 @@ class App extends Component {
         <div className="container">
           <div className="buttonDiv">
             <img src={jedi} alt="logo" className="buttonImage" />
-            <input type="button" name="get people" value="All People" onClick={this.handleInputChange} />
-            <input type="text" name="search people" placeholder="Search people" onChange={this.handleInputChange} />
+            <input
+              type="button"
+              name="get people "
+              value="All People"
+              onClick={this.handleInputChange}
+            />
+            <input
+              type="text"
+              name="search people "
+              placeholder="Search people by name"
+              onChange={this.handleInputChange}
+            />
           </div>
           <div className="buttonDiv">
             <img src={planet} alt="logo" className="buttonImage" />
-            <input type="button" name="get planets" value="All Planets" onClick={this.handleInputChange} />
+            <input
+              type="button"
+              name="get planets"
+              value="All Planets"
+              onClick={this.handleInputChange}
+            />
+            <input
+              type="text"
+              name="search planets"
+              placeholder="Search planets by name"
+              onChange={this.handleInputChange}
+            />
+          </div>
+          <div>
+            <div className="checkmarkDiv">
+              <label>
+                Name
+                <input
+                  name="get people ?sort=name"
+                  type="checkbox"
+                  checked={
+                    this.state.choice3 === "?sort=name" &&
+                    this.state.choice2 === "/people"
+                  }
+                  onChange={this.handleInputChange}
+                />
+              </label>
+              {console.log(this.state.choice3, this.state.choice2)}
+              <label>
+                mass
+                <input
+                  name="get people ?sort=mass"
+                  type="checkbox"
+                  checked={this.state.choice3 === "?sort=mass"}
+                  onChange={this.handleInputChange}
+                />
+              </label>
+              <label>
+                height
+                <input
+                  name="get people ?sort=height"
+                  type="checkbox"
+                  checked={this.state.choice3 === "?sort=height"}
+                  onChange={this.handleInputChange}
+                />
+              </label>
+            </div>
+            <div className="checkmarkDiv" style={{ paddingLeft: "50px" }}>
+              <label>
+                Name
+                <input
+                  name="get planets ?sort=name"
+                  type="checkbox"
+                  checked={
+                    this.state.choice3 === "?sort=name" &&
+                    this.state.choice2 === "/planets"
+                  }
+                  onChange={this.handleInputChange}
+                />
+              </label>
+              <label>
+                population
+                <input
+                  name="get planets ?sort=population"
+                  type="checkbox"
+                  checked={this.state.choice3 === "?sort=population"}
+                  onChange={this.handleInputChange}
+                />
+              </label>
+              <label>
+                diameter
+                <input
+                  name="get planets ?sort=diameter"
+                  type="checkbox"
+                  checked={this.state.choice3 === "?sort=diameter"}
+                  onChange={this.handleInputChange}
+                />
+              </label>
+            </div>
           </div>
         </div>
-        {/*this.state.data.map((rep, index) =>
-          <p key={index}>{rep.name}</p>
-        )*/}
-        {JSON.stringify(this.state.data)}
+        <br /> <br />
+        <input type="text" placeholder="query" value={this.state.url} />
+        <input type="button" value="Go!" onClick={this.getStuff} />
+        <br /> <br />
+        {/*this.renderSorts()*/}
+        <pre style={{ textAlign: "left" }}>
+          {JSON.stringify(this.state.data, null, 2)}
+        </pre>
         {this.renderEmptyState()}
         {this.state.errorMessage}
       </main>
