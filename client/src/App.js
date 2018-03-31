@@ -113,13 +113,13 @@ class App extends Component {
             <img src={planet} alt="logo" className="buttonImage" />
             <input
               type="button"
-              name="get planets"
+              name="get planets "
               value="All Planets"
               onClick={this.handleInputChange}
             />
             <input
               type="text"
-              name="search planets"
+              name="search planets "
               placeholder="Search planets by name"
               onChange={this.handleInputChange}
             />
