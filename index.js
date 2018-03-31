@@ -22,7 +22,7 @@ function search(req, res, next) {
 }
 
 function handleApiResponse(req, res, next) {
-  return (err, response, body) => {
+  return async (err, response, body) => {
     if (err || body[0] === "<") {
       res.locals = {
         success: false,
@@ -31,6 +31,7 @@ function handleApiResponse(req, res, next) {
       console.log("Failed");
       return next();
     }
+
     const results =
       JSON.parse(body).results !== undefined
         ? JSON.parse(body).results
@@ -48,6 +49,20 @@ function handleApiResponse(req, res, next) {
       });
     }
     // Sorting end
+
+    // Fetch residents
+    const residents = results[0].residents;
+    if (residents && req.query.residents) {
+      const promises = residents.map((resp, i) => {
+        return new Promise((resolve, reject) => {
+          request(resp, (err, response, body) => {
+            results[0].residents[i] = JSON.parse(body).name;
+            resolve();
+          });
+        });
+      });
+      await Promise.all(promises);
+    }
 
     res.locals = {
       success: true,

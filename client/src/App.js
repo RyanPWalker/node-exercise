@@ -11,6 +11,7 @@ class App extends Component {
     choice1: "get",
     choice2: "people",
     choice3: "",
+    residents: false,
     errorMessage: ""
   };
 
@@ -18,9 +19,11 @@ class App extends Component {
     const name = event.target.name;
     const one = "/" + name.split(" ")[0];
     const two = "/" + name.split(" ")[1];
-    let three =
+    const three =
       one === "/search" ? "/" + event.target.value : name.split(" ")[2];
-    const endpoint = one + two + three;
+    const four =
+      this.state.residents && one === "/search" ? "?residents=true" : "";
+    const endpoint = one + two + three + four;
     console.log(endpoint);
 
     this.setState({
@@ -135,7 +138,6 @@ class App extends Component {
                   onChange={this.handleInputChange}
                 />
               </label>
-              {console.log(this.state.choice3, this.state.choice2)}
               <label>
                 mass
                 <input
@@ -184,6 +186,20 @@ class App extends Component {
                   type="checkbox"
                   checked={this.state.choice3 === "?sort=diameter"}
                   onChange={this.handleInputChange}
+                />
+              </label>
+              <label>
+                residents
+                <input
+                  name="search planets "
+                  type="checkbox"
+                  checked={this.state.residents}
+                  onChange={() => {
+                    this.setState({
+                      residents: !this.state.residents,
+                      url: this.state.url + "?residents=true"
+                    });
+                  }}
                 />
               </label>
             </div>
