@@ -34,13 +34,7 @@ class App extends Component {
     });
   };
 
-  handleClick = () => {
-    this.setState({}, () => {
-      if (this.state.choice1) this.getStuff();
-    });
-  };
-
-  getStuff = () => {
+  getData = () => {
     try {
       fetch(this.state.url)
         .then(res => res.json())
@@ -68,23 +62,6 @@ class App extends Component {
           No data has been fetched. Select an option and click Go!
         </p>
       );
-    }
-  };
-
-  renderSorts = () => {
-    if (this.state.choice2 === "people") {
-      return this.state.data.map((rep, index) => (
-        <p key={index}>
-          {rep.name} {rep.mass} {rep.height}
-        </p>
-      ));
-    }
-    if (this.state.choice2 === "planets") {
-      return this.state.data.map((rep, index) => (
-        <p key={index}>
-          {rep.name} {rep.population} {rep.diameter}
-        </p>
-      ));
     }
   };
 
@@ -207,9 +184,8 @@ class App extends Component {
         </div>
         <br /> <br />
         <input type="text" placeholder="query" value={this.state.url} />
-        <input type="button" value="Go!" onClick={this.getStuff} />
+        <input type="button" value="Go!" onClick={this.getData} />
         <br /> <br />
-        {/*this.renderSorts()*/}
         <pre style={{ textAlign: "left" }}>
           {JSON.stringify(this.state.data, null, 2)}
         </pre>
