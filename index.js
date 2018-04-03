@@ -1,81 +1,87 @@
 const express = require("express");
-const request = require("request");
 const cors = require("cors");
+const axios = require("axios");
 const app = express();
+
+const wrap = fn => (req, res, next) =>
+  fn(req, res, next)
+    .then(() => {})
+    .catch(next);
 
 app.use(cors());
 
-app.get("/get/:item", get, jsonResponse);
+app.get("/get/:item", wrap(get), jsonResponse);
 
-app.get("/search/:item/:attribute", search, jsonResponse);
+app.get("/search/:item/:attribute", wrap(search), jsonResponse);
 
-function get(req, res, next) {
+async function get(req, res, next) {
   const url = `https://swapi.co/api/${req.params.item}`;
-  request(url, handleApiResponse(req, res, next));
+  const { data } = await axios.get(url);
+
+  res.locals = await handleApiResponse(data, req.query);
+
+  next();
 }
 
-function search(req, res, next) {
+async function search(req, res, next) {
   const url = `https://swapi.co/api/${req.params.item}/?search=${
     req.params.attribute
   }`;
-  request(url, handleApiResponse(req, res, next));
+
+  const { data } = await axios.get(url);
+
+  res.locals = await handleApiResponse(data, req.query);
+
+  next();
 }
 
-function handleApiResponse(req, res, next) {
-  return async (err, response, body) => {
-    if (err || body[0] === "<") {
-      res.locals = {
-        success: false,
-        error: err || "Invalid request. Please check your state variable."
-      };
-      console.log("Failed");
-      return next();
-    }
+async function handleApiResponse(data, query) {
+  const results = data.results || data;
 
-    const results =
-      JSON.parse(body).results !== undefined
-        ? JSON.parse(body).results
-        : JSON.parse(body);
+  // Sorting begin
+  const item = query.sort;
+  if (item !== undefined) {
+    results.sort(function(a, b) {
+      return a[item].localeCompare(b[item], "kn", { numeric: true });
+    });
+  }
+  // Sorting end
 
-    // Sorting begin
-    const item = req.query.sort;
-    if (item !== undefined) {
-      results.sort(function(a, b) {
-        if (!isNaN(parseFloat(a[item])) && isFinite(a[item])) {
-          return a[item] - b[item];
-        } else {
-          return a[item].localeCompare(b[item]);
-        }
-      });
-    }
-    // Sorting end
+  // Fetch residents
+  const residents = results[0].residents;
+  if (residents && query.residents) {
+    await Promise.all(
+      residents.map(async (resp, i) => {
+        const { data } = await axios.get(resp);
+        results[0].residents[i] = data.name;
+      })
+    );
+  }
 
-    // Fetch residents
-    const residents = results[0].residents;
-    if (residents && req.query.residents) {
-      const promises = residents.map((resp, i) => {
-        return new Promise((resolve, reject) => {
-          request(resp, (err, response, body) => {
-            results[0].residents[i] = JSON.parse(body).name;
-            resolve();
-          });
-        });
-      });
-      await Promise.all(promises);
-    }
-
-    res.locals = {
-      success: true,
-      results: results
-    };
-
-    return next();
+  return {
+    success: true,
+    results: results
   };
 }
 
 function jsonResponse(req, res, next) {
   return res.json(res.locals);
 }
+
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: "Not Found"
+  });
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    success: false,
+    error: "Server Error"
+  });
+  console.error(err);
+});
 
 const server = app.listen(3001, () => {
   const host = server.address().address,
