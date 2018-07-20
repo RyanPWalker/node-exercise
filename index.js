@@ -27,7 +27,6 @@ async function search(req, res, next) {
   const url = `https://swapi.co/api/${req.params.item}/?search=${
     req.params.attribute
   }`;
-
   const { data } = await axios.get(url);
 
   res.locals = await handleApiResponse(data, req.query);
@@ -84,8 +83,7 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(3001, () => {
-  const host = server.address().address,
-    port = server.address().port;
+  const port = server.address().port;
 
-  console.log("API listening at http://%s:%s", host, port);
+  console.log("API listening at http://localhost:%s", port);
 });
