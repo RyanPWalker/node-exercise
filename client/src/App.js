@@ -21,21 +21,36 @@ class App extends Component {
     const two = "/" + name.split(" ")[1];
     const three =
       one === "/search" ? "/" + event.target.value : name.split(" ")[2];
-    const four =
-      this.state.residents && one === "/search" ? "?residents=true" : "";
-    const endpoint = one + two + three + four;
+    const four = this.state.residents ? "&residents=true" : "";
+    let endpoint = one + two + three + four;
+    endpoint =
+      endpoint.indexOf("?") > 0 ? endpoint : endpoint.replace("&", "?");
     console.log(endpoint);
 
     this.setState({
       choice1: one,
       choice2: two,
       choice3: three,
+      residents: false,
       url: endpoint
+    });
+  };
+
+  handleResidents = () => {
+    console.log(this.state.residents);
+    let url = this.state.residents
+      ? this.state.url.replace("residents=true", "")
+      : this.state.url + "&residents=true";
+    url = url.indexOf("?") > 0 ? url : url.replace("&", "?");
+    this.setState({
+      residents: !this.state.residents,
+      url: url
     });
   };
 
   getData = () => {
     try {
+      this.setState({ errorMessage: "Fetching results..." });
       fetch(this.state.url)
         .then(res => res.json())
         .then(res => {
@@ -171,12 +186,7 @@ class App extends Component {
                   name="search planets "
                   type="checkbox"
                   checked={this.state.residents}
-                  onChange={() => {
-                    this.setState({
-                      residents: !this.state.residents,
-                      url: this.state.url + "?residents=true"
-                    });
-                  }}
+                  onChange={this.handleResidents}
                 />
               </label>
             </div>
@@ -186,11 +196,11 @@ class App extends Component {
         <input type="text" placeholder="query" value={this.state.url} />
         <input type="button" value="Go!" onClick={this.getData} />
         <br /> <br />
+        {this.renderEmptyState()}
+        {this.state.errorMessage}
         <pre style={{ textAlign: "left" }}>
           {JSON.stringify(this.state.data, null, 2)}
         </pre>
-        {this.renderEmptyState()}
-        {this.state.errorMessage}
       </main>
     );
   }
